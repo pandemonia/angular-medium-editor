@@ -3,7 +3,7 @@
 
 angular.module('angular-medium-editor', [])
 
-  .directive('mediumEditor', function() {
+  .directive('mediumEditor', ['$parse', function($parse) {
 
     function toInnerText(value) {
       var tempEl = document.createElement('div'),
@@ -16,20 +16,19 @@ angular.module('angular-medium-editor', [])
     return {
       require: 'ngModel',
       restrict: 'AE',
-      scope: { bindOptions: '=' },
       link: function(scope, iElement, iAttrs, ngModel) {
-
         angular.element(iElement).addClass('angular-medium-editor');
 
         // Global MediumEditor
-        ngModel.editor = new MediumEditor(iElement, scope.bindOptions);
+        var mediumEditorOptions = $parse(iAttrs.bindOptions)(scope);
+        if (mediumEditorOptions && mediumEditorOptions.relativeToolbar) {
+          mediumEditorOptions.toolbar.relativeContainer = angular.element(iElement).next()[0];
+        }
 
+        ngModel.editor = new MediumEditor(iElement, mediumEditorOptions);
         ngModel.$render = function() {
-          ngModel.editor.setContent(ngModel.$viewValue || "");
-          var placeholder = ngModel.editor.getExtensionByName('placeholder');
-          if (placeholder) {
-            placeholder.updatePlaceholder(iElement[0]);
-          }
+          iElement.html(ngModel.$viewValue || "");
+          ngModel.editor.getExtensionByName('placeholder').updatePlaceholder(iElement[0]);
         };
 
         ngModel.$isEmpty = function(value) {
@@ -46,14 +45,6 @@ angular.module('angular-medium-editor', [])
           ngModel.$setViewValue(editable.innerHTML.trim());
         });
 
-        scope.$watch('bindOptions', function(bindOptions) {
-          ngModel.editor.init(iElement, bindOptions);
-        });
-
-        scope.$on('$destroy', function() {
-          ngModel.editor.destroy();
-        });
       }
     };
-
-  });
+  }]);

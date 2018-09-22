@@ -1,6 +1,11 @@
 # angular-medium-editor
 This is an AngularJS directive for the [Medium.com inline editor clone](https://github.com/yabwe/medium-editor) by Davi Ferreira.
 
+## Forked Changes
+Changing the directive from isolated to inheriting current scope. This was needed as other directives were added on to the same element needing it's own isolated scope.
+
+This directive used the isolated scope just to bind the options, this can be changed to parsing directly from the attributes.
+
 ## Install
 
 Install with [Bower](https://bower.io/):
